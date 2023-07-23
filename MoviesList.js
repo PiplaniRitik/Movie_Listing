@@ -7,6 +7,7 @@ const searchInput = document.getElementById('search-input');
 const searchButton = document.getElementById('search-button');
 const prevButton = document.getElementById('prev-button');
 const nextButton = document.getElementById('next-button');
+const movie_specification = document.getElementById('movie-specify');
 
 // State variables
 let currentPage = 1;
@@ -66,17 +67,27 @@ function fetchMovies(page, searchQuery) {
       } else {
         // Handle API error or no results found
         // Show an error message or feedback to the user
+        const error_handler = document.getElementById("error-message");
+        error_handler.innerHTML = "Unknown Error Occured";
+        error_handler.style.color = "white";
+        throw new Error(data.Error || 'Unknown error occurred');
+        
       }
     })
     .catch((error) => {
       // Handle fetch error
       // Show an error message or feedback to the user
+      const error_handler = document.getElementById("error-message");
+        error_handler.innerHTML = "Error fetching movie list";
+        error_handler.style.color = "white";
+      console.error('Error fetching movie list:', error.message);
+      return null;
     });
 }
 
 // Function to render a movie item in the list
 function renderMovieItem(movie) {
-    const temp = document.createElement("div");
+    var temp = document.createElement("div");
     temp.id=`${movie.imdbID}`;
     temp.style.marginBottom = "20px";
     temp.style.marginTop = "20px";
@@ -167,6 +178,8 @@ function renderMovieItem(movie) {
     const activeMovie = document.querySelector('.movie-item.active');
     if (activeMovie) {
       activeMovie.classList.remove('active');
+      movie_specification.innerHTML="";
+      movie_specification.style.padding = "0px";
       temp.classList.remove('positive');
       fetchMovies(currentPage, currentSearchQuery);
     }
@@ -175,7 +188,10 @@ function renderMovieItem(movie) {
     else{
         temp.classList.add('positive');
     movieItem.classList.add('active');
-    fetchMovieDetails(movie.imdbID);
+    fetchMovieDetails(movie.imdbID,activeMovie,temp);
+    // movie_specification.appendChild(movieDetails);
+    movie_specification.style.padding = "20px";
+    movie_specification.scrollIntoView({ behavior: 'smooth' });
     }
   });
 
@@ -183,7 +199,7 @@ function renderMovieItem(movie) {
 }
 
 // Function to fetch and render movie details
-function fetchMovieDetails(movieId) {
+function fetchMovieDetails(movieId,activeMovie,temp) {
     // console.log(movieId);
   const apiUrl = `https://www.omdbapi.com/?apikey=${apiKey}&i=${movieId}`;
 
@@ -196,20 +212,29 @@ function fetchMovieDetails(movieId) {
         // movieDetailsElement.innerHTML = '';
 
         // Render movie details
-        renderMovieDetails(data);
+        renderMovieDetails(data,activeMovie,temp);
       } else {
         // Handle API error or movie not found
         // Show an error message or feedback to the user
+        const error_handler = document.getElementById("error-message");
+        error_handler.innerHTML = "Movie Not Found";
+        error_handler.style.color = "white";
+        throw new Error(data.Error || 'Unknown error occurred');
       }
     })
     .catch((error) => {
       // Handle fetch error
       // Show an error message or feedback to the user
+      const error_handler = document.getElementById("error-message");
+        error_handler.innerHTML = "Error fetching movie list";
+        error_handler.style.color = "white";
+      console.error('Error fetching movie list:', error.message);
+    return null;
     });
 }
 
 // Function to render movie details in the movie details section
-function renderMovieDetails(movie) {
+function renderMovieDetails(movie,activeMovie,temp) {
     // console.log(movie);
   const movieDetails = document.createElement('div');
   movieDetails.classList.add('movie-details');
@@ -217,13 +242,34 @@ function renderMovieDetails(movie) {
     <h2>${movie.Title}</h2>
     <p>Year: ${movie.Year}</p>
     <p>Genre: ${movie.Genre}</p>
+    <p>Released: ${movie.Released}</p>
+    <p>Director: ${movie.Director}</p>
+    <p>Writer: ${movie.Writer}</p>
+    <p>Actors: ${movie.Actors}</p>
+    <p>Language: ${movie.Language}</p>
+    <p>Plot: ${movie.Plot}</p>
     <!-- Add more movie details here -->
   `;
 
   // Add movie rating and comments form (you can implement this)
   // ...
-  const c=document.getElementById(`${movie.imdbID}`);
-  c.appendChild(movieDetails);
+  const but = document.createElement('button');
+  but.classList.add("prev_next");
+  but.textContent = "Remove Details";
+
+  movie_specification.innerHTML = "<h1>SELECTED MOVIE DETAILS</h1>";
+  movie_specification.appendChild(movieDetails);
+  movie_specification.appendChild(but);
+
+  but.addEventListener('click',()=>{
+    // activeMovie.classList.remove('active');
+    movie_specification.innerHTML="";
+    movie_specification.style.padding = "0px";
+    temp.classList.remove('positive');
+    fetchMovies(currentPage, currentSearchQuery);
+  });
+//   const c=document.getElementById(`${movie.imdbID}`);
+//   c.appendChild(movieDetails);
 }
 
 // Initial fetch on page load
