@@ -13,6 +13,15 @@ let currentPage = 1;
 let totalResults = 0;
 let currentSearchQuery = '';
 
+searchInput.addEventListener('input',()=>{
+    if(searchInput.value.trim().length>=3 || searchInput.value.trim().length==0)
+    {
+        searchButton.click();
+    }
+
+
+});
+
 // Event listener for the search button
 searchButton.addEventListener('click', () => {
     currentSearchQuery = searchInput.value.trim();
@@ -52,6 +61,9 @@ function fetchMovies(page, searchQuery) {
         .then((response) => response.json())
         .then((data) => {
             if (data.Response === 'True') {
+
+                 const error_handler = document.getElementById("error-message");
+                error_handler.innerHTML = "";
                 // Update the total number of results
                 totalResults = parseInt(data.totalResults);
 
